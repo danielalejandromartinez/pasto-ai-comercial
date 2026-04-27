@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pasto.AI - Super Admin</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, select { margin-bottom: 10px; display: block; width: 100%; padding: 8px; }
+        button { background: #2ecc71; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+        h1 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Pasto.AI - Super Admin</h1>
+    <div class="card">
+        <h3>Registrar Nueva Empresa (Nuevo Tenant)</h3>
+        <form action="/superadmin/crear_tenant" method="POST">
+            <label>Nombre de la Empresa:</label>
+            <input type="text" name="nombre" placeholder="Ej: Club Social El Dorado" required>
+            
+            <label>Tipo de Industria:</label>
+            <select name="industria">
+                <option value="eventos">Eventos Sociales Premium</option>
+                <option value="restaurante">Restaurante</option>
+                <option value="hotel">Hotel</option>
+            </select>
+
+            <label>Plan:</label>
+            <select name="plan">
+                <option value="basico">Básico ($600.000/mes)</option>
+                <option value="premium">Premium (Setup + Mensualidad)</option>
+            </select>
+
+            <button type="submit">Crear Cliente y Activar Módulos</button>
+        </form>
+    </div>
+    <div class="card" style="margin-top: 20px;">
+        <h3>Empresas Registradas (Tenants)</h3>
+        <table border="1" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #eee;">
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Industria</th>
+                    <th>Plan</th>
+                    <th>Estado</th>
+                    <th>WhatsApp</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in clientes %}
+                <tr>
+                    <td>{{ c.id }}</td>
+                    <td>{{ c.nombre_empresa }}</td>
+                    <td>{{ c.industry_type }}</td>
+                    <td>{{ c.plan }}</td>
+                    <td>{{ c.status }}</td>
+                    <td>
+                        {% if c.features %}
+                            {% for f in c.features if f.module_name == 'whatsapp' %}
+                                {{ '✅ Activo' if f.is_enabled else '❌ Apagado' }}
+                            {% endfor %}
+                        {% else %}
+                            ⚠️ Sin configurar
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/superadmin/toggle_whatsapp/{{ c.id }}">
+                            <button style="background-color: #3498db;">Cambiar</button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

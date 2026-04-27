@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pasto.AI | Executive Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #05070a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --neon-green: #00ffcc;
+            --neon-blue: #00d4ff;
+            --text-main: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-weight: 200; font-size: 22px; letter-spacing: 3px; color: var(--neon-blue); margin-bottom: 5px; }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .kpi-value { font-size: 32px; font-weight: bold; margin: 5px 0; }
+        .kpi-label { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            height: 280px; /* Tamaño controlado */
+            position: relative;
+        }
+
+        h3 { font-size: 12px; font-weight: 400; color: var(--neon-blue); margin-bottom: 15px; text-transform: uppercase; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>INTELIGENCIA COMERCIAL // {{ tenant.nombre_empresa }}</h1>
+        <p style="color: #666; font-size: 12px;">Monitor de Rendimiento Pasto.AI</p>
+    </div>
+
+    <div class="kpi-row">
+        <div class="glass-card">
+            <div class="kpi-label">Pipeline de Ventas</div>
+            <div class="kpi-value" style="color: var(--neon-green);">$ {{ kpis.dinero }}</div>
+        </div>
+        <div class="glass-card">
+            <div class="kpi-label">Leads Capturados</div>
+            <div class="kpi-value">{{ kpis.leads }}</div>
+        </div>
+        <div class="glass-card">
+            <div class="kpi-label">Citas en Agenda</div>
+            <div class="kpi-value" style="color: var(--neon-blue);">{{ kpis.citas }}</div>
+        </div>
+    </div>
+
+    <div class="charts-row">
+        <div class="chart-container">
+            <h3>Distribución de Eventos</h3>
+            <canvas id="chartEventos"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Embudo Comercial</h3>
+            <canvas id="chartFunnel"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // GRÁFICA DE TORTA (EVENTOS)
+        new Chart(document.getElementById('chartEventos'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ kpis.distribucion.keys()|list|tojson }},
+                datasets: [{
+                    data: {{ kpis.distribucion.values()|list|tojson }},
+                    backgroundColor: ['#00ffcc', '#00d4ff', '#9d50bb', '#ff007c'],
+                    borderColor: '#05070a',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { position: 'bottom', labels: { color: '#ffffff', font: { size: 11 } } } 
+                }
+            }
+        });
+
+        // GRÁFICA DE BARRAS (FUNNEL)
+        new Chart(document.getElementById('chartFunnel'), {
+            type: 'bar',
+            data: {
+                labels: ['Interesados', 'Citas'],
+                datasets: [{
+                    data: [{{ kpis.leads }}, {{ kpis.citas }}],
+                    backgroundColor: ['rgba(0, 255, 204, 0.4)', 'rgba(0, 212, 255, 0.4)'],
+                    borderColor: ['#00ffcc', '#00d4ff'],
+                    borderWidth: 2,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#ffffff' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                    x: { ticks: { color: '#ffffff' }, grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

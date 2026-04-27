@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pasto.AI - Chat Inteligente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; background-color: #e5ddd5; display: flex; flex-direction: column; height: 100vh; margin: 0; }
+        .header { background: #075e54; color: white; padding: 15px; text-align: center; font-weight: bold; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word; }
+        .user { background: #dcf8c6; align-self: flex-end; }
+        .bot { background: white; align-self: flex-start; }
+        .footer { padding: 10px; background: white; display: flex; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        button { background: #075e54; color: white; border: none; padding: 10px 15px; margin-left: 5px; border-radius: 50%; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">Angela - Asistente Pasto.AI</div>
+    <div class="chat-box" id="chatBox">
+        <div class="msg bot">¡Hola! Soy Angela. ¿En qué puedo ayudarte hoy?</div>
+    </div>
+    <div class="footer">
+        <input type="text" id="userInput" placeholder="Escribe tu mensaje aquí..." onkeypress="if(event.key === 'Enter') enviarMensaje()">
+        <button onclick="enviarMensaje()">></button>
+    </div>
+
+    <script>
+        async function enviarMensaje() {
+            let input = document.getElementById('userInput');
+            let chatBox = document.getElementById('chatBox');
+            let texto = input.value.trim();
+            
+            if (texto === "") return;
+
+            // 1. Ponemos tu mensaje
+            chatBox.innerHTML += `<div class="msg user">${texto}</div>`;
+            input.value = ""; 
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // 2. Ponemos un mensaje de "Angela está pensando..."
+            let msgPensando = document.createElement("div");
+            msgPensando.className = "msg bot";
+            msgPensando.innerHTML = "<i>Angela está consultando el catálogo...</i>";
+            chatBox.appendChild(msgPensando);
+
+            try {
+                // 3. LLAMADA AL CEREBRO
+                const respuestaServidor = await fetch('/preguntar/{{ tenant.id }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensaje: texto })
+                });
+                
+                // Si el cerebro responde algo raro, lo capturamos aquí
+                if (!respuestaServidor.ok) {
+                    throw new Error("El cerebro respondió con un error " + respuestaServidor.status);
+                }
+
+                const datosRecibidos = await respuestaServidor.json();
+
+                // 4. Quitamos el "pensando" y ponemos la respuesta real
+                msgPensando.innerHTML = datosRecibidos.respuesta;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                // Si falla, ahora nos dirá EXACTAMENTE por qué
+                console.error("Error en la NASA:", error);
+                msgPensando.innerHTML = "❌ Error real: " + error.message;
+                msgPensando.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
